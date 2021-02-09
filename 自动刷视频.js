@@ -1,4 +1,4 @@
-/* 该脚本整合了快手极速版//抖音极速版//火山极速版//刷宝短视频//抖音火山版//彩蛋视频...(后续还可能更新其他)刷视频功能
+/* 该脚本整合了快手极速版//抖音极速版//火山极速版//刷宝短视频//抖音火山版//彩蛋视频//今日头条极速版...(后续还可能更新其他)刷视频功能
  * 目前加上快手极速版每日任务
  * 
  */
@@ -31,10 +31,11 @@ let kuaishou = {//快手极速版
             toast(Math.floor(sleepTime).toString() + 's之后跳到下个视频！已经执行' + flagTime.toString() + "次");
             sleep(sleepTime * 1000);
             //先判断有无特殊情况
-            if (className("android.widget.TextView").text("设置青少年模式").exists()) {
-                className("android.widget.LinearLayout").depth(4).findOne().click()
+            if (text("我知道了").exists()) {
+                text("我知道了").findOne().click()
             }
-            if (className("android.widget.TextView").text("点击打开图集").exists()) {
+            if (className("android.widget.TextView").text("点击打开图集").exists()||
+            className("android.widget.TextView").text("点击打开长图").exists()) {
                 toast("跳过图集")
                 nextVideo()
                 continue;
@@ -131,7 +132,8 @@ let douyin = {//抖音极速版
             sleep(sleepTime * 1000);
 
             //先判断特殊条件
-            if (className("android.widget.TextView").text("检测到更新").exists()) {
+            if (className("android.widget.TextView").text("检测到更新").exists()||
+                className("android.widget.TextView").text("以后再说").exists()) {
                 className("android.widget.TextView").text("以后再说").findOne().click()
             }
             if(!className("android.widget.RelativeLayout").depth(5).exists()){
@@ -235,11 +237,12 @@ let huoshan = {//火山极速版
             sleep(sleepTime * 1000);
             
             //先判断特殊情况
-            if (className("android.widget.TextView").text("进入儿童/青少年模式").exists()) {
+            if (className("android.widget.TextView").text("进入儿童/青少年模式").exists()||
+                className("android.widget.TextView").text("我知道了").exists()) {
                 className("android.widget.TextView").text("我知道了").findOne().click()
             }
 
-            if (!className("android.widget.TextView").text("关注").exists()) {//领取广告红包部分
+            if (!className("android.widget.TextView").text("关注").exists()) {//领取广告红包部分bug
                 if (className("android.widget.TextView").text("15S").exists()) {
                     toast("领取广告红包")
                     sleep(16*1000);
@@ -444,8 +447,12 @@ let shuabao = {//刷宝短视频
             sleepTime = randNum(5, 15);
             toast(Math.floor(sleepTime).toString() + 's之后跳到下个视频！已经执行' + flagTime.toString() + "次");
             sleep(sleepTime * 1000);
+            //先判断特殊情况
+            if (className("android.widget.TextView").text("我知道了").exists()) {
+                className("android.widget.TextView").text("我知道了").findOne().click()
+            }
 
-
+            //再执行操作
             nextVideo();
         }
         back();
@@ -537,8 +544,15 @@ let douyinhuoshan = {//抖音火山版
             sleepTime = randNum(5, 15);
             toast(Math.floor(sleepTime).toString() + 's之后跳到下个视频！已经执行' + flagTime.toString() + "次");
             sleep(sleepTime * 1000);
+            //先判断特殊情况
+            if (className("android.widget.TextView").text("以后再说").exists()) {
+                className("android.widget.TextView").text("以后再说").findOne().click()
+            }
+            if (className("android.widget.TextView").text("我知道了").exists()) {
+                className("android.widget.TextView").text("我知道了").findOne().click()
+            }
 
-
+            //再执行操作
             nextVideo();
         }
         back()
@@ -725,7 +739,58 @@ let caidan = {//彩蛋视频
     
     }
 };
+/** * 今日头条极速版 */
+let jinritoutiao = {//今日头条极速版
+    run: function (runTimes) {
+        toast('这是一个今日头条极速版刷视频脚本,1s之后打开APP');
+        sleep(1000);
+        var launchResult = app.launchApp("今日头条极速版");
+        if (!launchResult) {
+            toast('你还没有安装今日头条极速版！');
+            sleep(1000)
+            return;
+        }
+        toast('等待软件打开，5s之后进入下个动作！');
+        console.show()
+        console.log("准备开始!")
+        sleep(5000);
+        var sleepTime = 10;
+        var flagTime = 1; // 统计运行次数
+        className("android.widget.FrameLayout").depth(14).drawingOrder(4).findOne().click();
+        if (id("lj").exists()) {
+            while (true) {
+                if (className("android.widget.TextView").text("广告").exists()) {
+                    className("android.widget.FrameLayout").depth(14).drawingOrder(4).findOne().click()
+                }
+                id("lj").findOne().click();
+                sleeptime = randNum(1,2) * 60 * 1000;
+                console.log("准备观看" + Math.floor(sleeptime*0.001) + "s")
+                sleep(sleeptime);
 
+                swipe(device.width / 2, device.height* 2 / 3, device.width / 2, device.height* 1 / 3, 1000);
+                console.log("已经执行第" + flagTime + "次")
+                flagTime++
+                if (flagTime > runTimes) {
+                    break    
+                }
+            }
+        }
+        console.hide()
+        back();
+        back();
+        home();
+        sleep(1000);
+
+        
+
+        function randNum(minnum, maxnum) {//获取范围内的随机数
+            return minnum + Math.random() * (maxnum - minnum);
+        };
+        
+
+    
+    }
+}
 
 /** * 快手每日任务 */
 let kuaishou_perdaytask = {//快手每日任务
@@ -739,23 +804,21 @@ let kuaishou_perdaytask = {//快手每日任务
             sleep(5000)    //等待应用打开
             console.log("准备就绪！")
 
-            dytimes(1000, 3000)
+            dytimes(3000, 5000)
             /**-------------------------打开福利页面-------------------------------- */
             id("left_btn").click()//点击菜单
             dytimes(2000, 4000)
             drawingOrder("3").id("container").click()// drawingOrder("2") 点击去赚钱
             dytimes(2000, 4000)
+            if (id("close_btn").exists()) {
+                id("close_btn").click()
+            }
             /**-------------------------调用方法-------------------------------- */
             welfare()
             dytimes(1000, 3000)
             liveds()
             dytimes(1000, 3000)
-            console.log("第二次执行")
-            welfare()
-            dytimes(1000, 3000)
-            liveds()
-            dytimes(1000, 3000)
-
+            
             console.hide()
             home();//回到首页
         }
@@ -765,11 +828,12 @@ let kuaishou_perdaytask = {//快手每日任务
 
         /**-------------------------10次福利金币-------------------------------- */
         function welfare() {
+            dytimes(3000, 5000);
             swipe(device.width / 2, device.height * (8 / 9), device.width / 2, device.height * (1 / 2), 150)
             dytimes(3000, 5000);
             var i = 1
             while (true) {
-                i = i + 1;
+                
                 if (text("福利 领金币").findOnce()) {
                     text("福利 领金币").click();
                     console.log("第" + i + "次广告福利")
@@ -779,15 +843,18 @@ let kuaishou_perdaytask = {//快手每日任务
                     id("video_close_icon").click()
                     dytimes(3000, 5000);
                 }
+
                 if (text("福利").findOnce()) {
+                    i = i + 1;
                     text("福利").click();
                     console.log("第" + i + "次广告福利")
                     //等待广告关闭按钮点击
-                    dytimes(3000, 5000);
+                    dytimes(5000, 8000);
                     id("video_close_icon").waitFor()
                     id("video_close_icon").click()
                     dytimes(3000, 5000);
                     }
+
                 if (className("android.view.View").text("明天看视频继续领取1000金币").exists() || i == 20) {
                     console.log("10次广告福利结束啦！");
                     break;
@@ -799,49 +866,51 @@ let kuaishou_perdaytask = {//快手每日任务
             swipe(device.width / 2, device.height * (8 / 9), device.width / 2, device.height * (1 / 4), 150)
             dytimes(3000, 5000);
             console.log("开始看直播10次咯！")
-            if (className("android.view.View").text("今日已成功领取直播奖励金币").exists()) {
-                console.log("10次直播福利结束啦！二次运行");
-                back()
+            text("看直播").click()
+            if (id("award_count_down_text").exists()) {
+                for (var i = 1; i <= 10; i++) {
+                    console.log("第" + i + "次直播奖励")
+                    sleep(40 * 1000)
+                    swipe(device.width / 2, device.height * (8 / 9), device.width / 2, device.height * (1 / 4), 150)
+                    if (id("close_btn").exists()) {
+                        id("close_btn").click()
+                        console.log("有关注主播弹出");
+                    }                    
+                }
+                back();
+                sleep(1000);
+                if (className(android.widget.Button).text("退出").exists()) {
+                className(android.widget.Button).text("退出").findOnce().click();    
+                }
+                sleep(1000);
+                back();
+                sleep(1000);
+                if (className(android.widget.Button).text("退出").exists()) {
+                    className(android.widget.Button).text("退出").findOnce().click();    
+                }
+                home();
             }
             else {
-                className("android.view.View").text("直播送礼赚金币").findOne().parent().click()
-                text("看直播").click()
-                for (let i = 1; i <= 10; i++) {
-                    console.log("第" + i + "次直播奖励")
-                    sleep(32 * 1000)
-                    swipe(device.width / 2, device.height * (8 / 9), device.width / 2, device.height * (1 / 4), 150)
-                    if (text("close_btn").exists()) {
-                        text("close_btn").click()
-                        console.log("有关注主播弹出");
-                        // id("close_btn").waitFor()
-                    } 
-                    else if (i == 10) {
-                        console.log("10次直播福利结束啦！");
-                        console.hide()
-                        back();
-                        back();
-                        sleep(1000);
-                        className(android.widget.Button).text("退出").findOne().click();
-                        back();
-                        home();//回到首页
-                        
-                        
-                        // if (id("exit_btn").exists()) {
-                        //     id("exit_btn").findOne().click()
-                        //     back();
-                        //     sleep(3000)
-                        //     back();
-                        // }
-
-                        
-                    }
+                console.log("10次直播福利结束啦！");
+                back();
+                sleep(1000);
+                if (className(android.widget.Button).text("退出").exists()) {
+                    className(android.widget.Button).text("退出").findOnce().click();    
                 }
+                sleep(1000);
+                back();
+                sleep(1000);
+                if (className(android.widget.Button).text("退出").exists()) {
+                    className(android.widget.Button).text("退出").findOnce().click();    
+                }
+                home();
             }
         }
+        
         /**-------------------------随机时间-------------------------------- */
         function dytimes(time1, time2) {
             delayTime = random(time1, time2)
-            sleep(delayTime)    //在视频停留8-12秒
+            sleep(delayTime)
         }
     }
 }
@@ -851,7 +920,6 @@ let shuabao_perdaytask = {//刷宝每日任务
          shuabao_perday = dialogs.confirm("是否执行刷宝每日任务部分?");
         if (shuabao_perday) {/** 刷宝短视频每日任务程序部分  */
             /**-------------------------打开APP-------------------------------- */
-            //let times = rawInput("请输入要自动刷的视频次数：", "500")  //用户设置刷视频的个数，默认100
             launchApp("刷宝短视频");
             console.show()  //显示悬浮窗（需要先打开悬浮窗权限）
             sleep(5000)    //等待应用打开
@@ -1092,12 +1160,13 @@ function main(i) {/**主函数*/
         shuabao.run(Math.floor(random(20,30)))//参数为每次循环刷动的次数
         huoshan.run(Math.floor(random(20,30)))//参数为每次循环刷动的次数
         caidan.run(Math.floor(random(20,30)))//参数为每次循环刷动的次数
+        jinritoutiao.run(Math.floor(random(20,30)))//参数为每次循环刷动的次数
         
         i--;
     }
-        // qkk.open()//打开趣看看短视频
-        // .article(50, 10)//阅读文章数，每篇文章滑动次数
-        // .video(1000)//看的短视频数量
+    // qkk.open()//打开趣看看短视频
+    // .article(50, 10)//阅读文章数，每篇文章滑动次数
+    // .video(1000)//看的短视频数量
 }
 
 
@@ -1109,10 +1178,10 @@ function main(i) {/**主函数*/
        
 auto.waitFor()
 var times = rawInput("请输入要自动刷的视频次数：","50");
-dialogs.alert("!!!警告!!!","请先把Adgaurd的DNS过滤切换,系统将会给一分钟时间检查");
-sleep(30*1000);
-toast("还有30秒");
-sleep(30*1000)
+dialogs.alert("!!!警告!!!","请先把Adgaurd的DNS过滤切换,系统将会给15s时间检查。");
+sleep(10*1000);
+dialogs.alert("还有5秒");
+sleep(5*1000)
 
 
 main(times);
